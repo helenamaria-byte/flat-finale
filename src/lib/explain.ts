@@ -24,7 +24,8 @@ Rules:
 Reply with JSON only: {"summaries": [one string per flat, in the same order], "overall": "one sentence"}`;
 
 export async function explainOptions(options: MatchOption[]): Promise<Explanation | null> {
-  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+  // Strip spaces and line breaks that sneak in when a key is pasted into the Vercel dashboard.
+  const apiKey = (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "").replace(/\s+/g, "");
   if (!apiKey || !options.length) return null;
   const ai = new GoogleGenAI({ apiKey });
 
@@ -67,7 +68,10 @@ export async function explainOptions(options: MatchOption[]): Promise<Explanatio
     return parsed;
   } catch (err) {
     // Quota limits, a bad key or an unknown model all land here; the app falls back to its own summaries.
-    console.error("Gemini summary failed, using rule-based summaries:", err instanceof Error ? err.message : err);
+    // Never log the key itself: some errors echo it back.
+    const raw = err instanceof Error ? err.message : String(err);
+    const safe = raw.split(apiKey).join("[key]").replace(/[A-Za-z0-9._-]{30,}/g, "[redacted]");
+    console.error("Gemini summary failed, using rule-based summaries:", safe);
     return null;
   }
 }
