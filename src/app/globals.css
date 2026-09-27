@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #fbf6ee;
+  --color-paper: #ffffff;
+  --color-sand: #eadfcd;
+  --color-sand-dark: #d9c9b0;
+  --color-ink: #1e2b2f;
+  --color-muted: #5f6b6d;
+  --color-clay: #c65f3a;
+  --color-clay-dark: #a84c2c;
+  --color-teal: #1f5c58;
+  --color-sage: #8aa889;
+  --color-glow: #f6c56b;
+  --color-good: #2f7d4f;
+  --color-warn: #b7791f;
+  --color-bad: #b83a3a;
+  --font-sans: var(--font-geist-sans);
+  --font-display: var(--font-fraunces);
+}
+
+html {
+  background: var(--color-cream);
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+}
+
+.card {
+  background: var(--color-paper);
+  border: 1px solid var(--color-sand);
+  border-radius: 1.25rem;
+  box-shadow: 0 1px 2px rgb(30 43 47 / 0.04), 0 8px 24px -12px rgb(30 43 47 / 0.12);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn-primary {
+  background: var(--color-clay);
+  color: white;
+  box-shadow: 0 6px 16px -8px rgb(198 95 58 / 0.7);
+}
+.btn-primary:hover {
+  background: var(--color-clay-dark);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--color-ink);
+  border: 1px solid var(--color-sand-dark);
+}
+.btn-ghost:hover {
+  background: var(--color-sand);
+}
+
+.input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-sand-dark);
+  background: white;
+  padding: 0.7rem 0.9rem;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input:focus {
+  border-color: var(--color-teal);
+  box-shadow: 0 0 0 3px rgb(31 92 88 / 0.15);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 0.5s ease-out both;
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.flicker {
+  animation: flicker 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise, .flicker {
+    animation: none;
+  }
+}
