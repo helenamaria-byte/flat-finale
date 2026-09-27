@@ -26,7 +26,7 @@ Without Redis it uses in-memory storage, which is fine for local testing.
 2. Create a free project at [supabase.com](https://supabase.com). Open **SQL Editor**, paste the contents of `supabase/schema.sql` and click **Run**.
 3. In Supabase, open **Project Settings → API** and copy the **Project URL** and the **service_role** key.
 4. In Vercel, open **Settings → Environment Variables** and add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
-5. Optional: add `GEMINI_API_KEY` to get Gemini-written summaries (default model `gemini-2.5-flash`; set `GEMINI_MODEL` to change it).
+5. Optional: add `GEMINI_API_KEY` to get Gemini-written summaries (default model `gemini-3.8-flash`; set `GEMINI_MODEL` to change it).
 6. Redeploy.
 
 Upstash Redis also works instead of Supabase (Vercel → Storage → Upstash for Redis).

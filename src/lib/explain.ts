@@ -9,7 +9,7 @@ export interface Explanation {
 }
 
 // Override with GEMINI_MODEL in Vercel if your key has access to a different model.
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 
 const SYSTEM = `You help a group of friends who are choosing a flat to share. You'll get a few shortlisted flats and, for each person, what they get, what they give up, and any dealbreakers. These were worked out by fixed rules, so treat them as facts.
 
