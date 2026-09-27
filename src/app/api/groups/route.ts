@@ -1,10 +1,11 @@
 import { MAX_PEOPLE, MIN_PEOPLE } from "@/lib/limits";
-import { saveGroup } from "@/lib/store";
+import { deployedWithoutDb, saveGroup, STORAGE_WARNING } from "@/lib/store";
 import type { Group } from "@/lib/types";
 
 const clean = (s: unknown, max: number) => (typeof s === "string" ? s.trim().slice(0, max) : "");
 
 export async function POST(request: Request) {
+  if (deployedWithoutDb) return Response.json({ error: STORAGE_WARNING }, { status: 503 });
   const body = await request.json().catch(() => ({}));
   const name = clean(body.name, 60);
   const members = Array.isArray(body.members) ? body.members.map((m: unknown) => clean(m, 30)) : [];

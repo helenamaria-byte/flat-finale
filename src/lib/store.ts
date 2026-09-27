@@ -8,6 +8,18 @@ const redis = url && token ? new Redis({ url, token }) : null;
 
 export const storageKind: "redis" | "memory" = redis ? "redis" : "memory";
 
+// On Vercel, in-memory storage isn't shared between server instances, so groups seem to vanish.
+export const deployedWithoutDb = !redis && !!process.env.VERCEL;
+export const STORAGE_WARNING =
+  "No database is connected, so groups can't be saved on the live site. In Vercel, go to Storage, connect Upstash for Redis, redeploy, then start a new group.";
+
+export function groupNotFound() {
+  return Response.json(
+    { error: deployedWithoutDb ? STORAGE_WARNING : "We couldn't find that group. The link may be wrong or the group may have expired." },
+    { status: 404 },
+  );
+}
+
 // Local-dev fallback. It resets on restart and isn't shared between serverless instances.
 const g = globalThis as unknown as { __flatFinaleMem?: Map<string, unknown> };
 const mem = (g.__flatFinaleMem ??= new Map());

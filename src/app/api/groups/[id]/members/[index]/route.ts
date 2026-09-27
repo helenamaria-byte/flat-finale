@@ -1,6 +1,6 @@
 import { AREA_IDS } from "@/lib/areas";
 import { FEATURES } from "@/lib/features";
-import { getGroup, saveResponse } from "@/lib/store";
+import { getGroup, saveResponse, groupNotFound } from "@/lib/store";
 import type { Anchor, AreaId, FeatureKey, MemberResponse, Pref } from "@/lib/types";
 
 const isArea = (a: unknown): a is AreaId => AREA_IDS.includes(a as AreaId);
@@ -39,7 +39,7 @@ export async function POST(request: Request, { params }: RouteContext<"/api/grou
   const { id, index } = await params;
   const i = Number(index);
   const group = await getGroup(id);
-  if (!group) return Response.json({ error: "Group not found" }, { status: 404 });
+  if (!group) return groupNotFound();
   if (!Number.isInteger(i) || i < 0 || i >= group.members.length) return Response.json({ error: "Unknown member" }, { status: 400 });
 
   const body = await request.json().catch(() => ({}));

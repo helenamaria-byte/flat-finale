@@ -1,6 +1,6 @@
 import { explainOptions, type Explanation } from "@/lib/explain";
 import { computeMatches } from "@/lib/match";
-import { getExplanation, getGroup, getResponses, saveExplanation } from "@/lib/store";
+import { getExplanation, getGroup, getResponses, saveExplanation, groupNotFound } from "@/lib/store";
 import type { MemberResponse, Results } from "@/lib/types";
 
 export const maxDuration = 60;
@@ -8,7 +8,7 @@ export const maxDuration = 60;
 export async function GET(_request: Request, { params }: RouteContext<"/api/groups/[id]/results">) {
   const { id } = await params;
   const group = await getGroup(id);
-  if (!group) return Response.json({ error: "Group not found" }, { status: 404 });
+  if (!group) return groupNotFound();
 
   const responses = await getResponses(id, group.members.length);
   if (responses.some((r) => !r)) {
