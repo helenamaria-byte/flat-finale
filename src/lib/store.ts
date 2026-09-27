@@ -1,17 +1,24 @@
+import { createClient } from "@supabase/supabase-js";
 import { Redis } from "@upstash/redis";
 import type { Group, MemberResponse } from "./types";
 
-// Vercel's Upstash integration sets KV_REST_API_*; a direct Upstash setup uses UPSTASH_REDIS_REST_*.
+// Supabase: the Vercel integration sets SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) and SUPABASE_SERVICE_ROLE_KEY.
+// The service role key stays on the server; the table has row-level security on with no public policies.
+const sbUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabase = sbUrl && sbKey ? createClient(sbUrl, sbKey, { auth: { persistSession: false } }) : null;
+
+// Upstash Redis: Vercel's integration sets KV_REST_API_*; a direct Upstash setup uses UPSTASH_REDIS_REST_*.
 const url = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
 const token = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
-const redis = url && token ? new Redis({ url, token }) : null;
+const redis = !supabase && url && token ? new Redis({ url, token }) : null;
 
-export const storageKind: "redis" | "memory" = redis ? "redis" : "memory";
+export const storageKind: "supabase" | "redis" | "memory" = supabase ? "supabase" : redis ? "redis" : "memory";
 
 // On Vercel, in-memory storage isn't shared between server instances, so groups seem to vanish.
-export const deployedWithoutDb = !redis && !!process.env.VERCEL;
+export const deployedWithoutDb = storageKind === "memory" && !!process.env.VERCEL;
 export const STORAGE_WARNING =
-  "No database is connected, so groups can't be saved on the live site. In Vercel, go to Storage, connect Upstash for Redis, redeploy, then start a new group.";
+  "No database is connected, so groups can't be saved on the live site. Connect Supabase in Vercel (see the README), redeploy, then start a new group.";
 
 export function groupNotFound() {
   return Response.json(
@@ -25,17 +32,35 @@ const g = globalThis as unknown as { __flatFinaleMem?: Map<string, unknown> };
 const mem = (g.__flatFinaleMem ??= new Map());
 
 const TTL = 60 * 60 * 24 * 30; // 30 days
+const TABLE = "flat_finale_kv";
 
 async function get<T>(key: string): Promise<T | null> {
+  if (supabase) {
+    const { data, error } = await supabase
+      .from(TABLE)
+      .select("value")
+      .eq("key", key)
+      .gt("expires_at", new Date().toISOString())
+      .maybeSingle();
+    if (error) throw new Error(`Supabase read failed: ${error.message}`);
+    return (data?.value as T) ?? null;
+  }
   if (redis) return (await redis.get<T>(key)) ?? null;
   return (mem.get(key) as T) ?? null;
 }
 async function set(key: string, value: unknown) {
-  if (redis) await redis.set(key, value, { ex: TTL });
+  if (supabase) {
+    const expires_at = new Date(Date.now() + TTL * 1000).toISOString();
+    const { error } = await supabase.from(TABLE).upsert({ key, value, expires_at });
+    if (error) throw new Error(`Supabase write failed: ${error.message}`);
+  } else if (redis) await redis.set(key, value, { ex: TTL });
   else mem.set(key, value);
 }
 async function del(key: string) {
-  if (redis) await redis.del(key);
+  if (supabase) {
+    const { error } = await supabase.from(TABLE).delete().eq("key", key);
+    if (error) throw new Error(`Supabase delete failed: ${error.message}`);
+  } else if (redis) await redis.del(key);
   else mem.delete(key);
 }
 

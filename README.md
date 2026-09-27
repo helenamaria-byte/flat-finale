@@ -23,8 +23,12 @@ Without Redis it uses in-memory storage, which is fine for local testing.
 ## Deploy on Vercel
 
 1. Push this folder to a GitHub repo and import it in Vercel.
-2. In the Vercel project, go to **Storage → Upstash for Redis → Create** and connect it. This sets `KV_REST_API_URL` and `KV_REST_API_TOKEN` for you.
-3. Optional: add `ANTHROPIC_API_KEY` to get Claude-written summaries.
-4. Redeploy.
+2. Create a free project at [supabase.com](https://supabase.com). Open **SQL Editor**, paste the contents of `supabase/schema.sql` and click **Run**.
+3. In Supabase, open **Project Settings → API** and copy the **Project URL** and the **service_role** key.
+4. In Vercel, open **Settings → Environment Variables** and add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
+5. Optional: add `ANTHROPIC_API_KEY` to get Claude-written summaries.
+6. Redeploy.
+
+Upstash Redis also works instead of Supabase (Vercel → Storage → Upstash for Redis).
 
 Listings in `src/lib/listings.ts` are sample data. Commute times are rough estimates based on distance between Pune areas (`src/lib/areas.ts`).

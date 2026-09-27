@@ -103,7 +103,7 @@ export default function FillPage() {
           features,
         }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({ error: "The server had a problem saving. Please try again." }));
       if (!res.ok) throw new Error(data.error ?? "Couldn't save your answers.");
       router.push(`/g/${id}?done=${i}`);
     } catch (err) {

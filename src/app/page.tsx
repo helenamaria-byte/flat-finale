@@ -51,7 +51,7 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: groupName, members }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({ error: "The server had a problem saving. Please try again." }));
       if (!res.ok) throw new Error(data.error ?? "Something went wrong.");
       router.push(`/g/${data.id}`);
     } catch (err) {

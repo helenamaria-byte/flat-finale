@@ -37,7 +37,7 @@ export interface Group {
 export interface GroupStatus {
   group: Group;
   submitted: boolean[];
-  storage: "redis" | "memory";
+  storage: "supabase" | "redis" | "memory";
 }
 
 export interface Listing {
