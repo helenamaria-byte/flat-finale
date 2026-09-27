@@ -30,8 +30,9 @@ function PersonColumn({ p }: { p: PersonVerdict }) {
 }
 
 function OptionCard({ o, letter, delay }: { o: MatchOption; letter: string; delay: number }) {
+  const groupSize = o.people.length;
   const l = o.listing;
-  const perks = FEATURES.filter((f) => hasFeature(l, f.key));
+  const perks = FEATURES.filter((f) => hasFeature(l, f.key, groupSize));
   return (
     <article className="card rise overflow-hidden" style={{ animationDelay: `${delay}ms` }}>
       <div className="grid gap-6 p-6 sm:grid-cols-[140px_1fr] sm:p-8">
@@ -44,7 +45,7 @@ function OptionCard({ o, letter, delay }: { o: MatchOption; letter: string; dela
           </div>
           <h2 className="mt-3 font-display text-2xl font-semibold sm:text-3xl">{l.name}</h2>
           <p className="text-muted">
-            {areaName(l.area)} · 3BHK · {l.sqft.toLocaleString("en-IN")} sq ft · {l.floor === 0 ? "Ground floor" : `Floor ${l.floor} of ${l.totalFloors}`}
+            {areaName(l.area)} · {l.bhk}BHK · {l.sqft.toLocaleString("en-IN")} sq ft · {l.floor === 0 ? "Ground floor" : `Floor ${l.floor} of ${l.totalFloors}`}
           </p>
           <p className="mt-2 font-display text-2xl text-teal">{rupees(l.rent)}<span className="font-sans text-sm text-muted"> /month total</span></p>
           <div className="mt-3 flex flex-wrap gap-1.5">
@@ -53,7 +54,7 @@ function OptionCard({ o, letter, delay }: { o: MatchOption; letter: string; dela
           <p className="mt-4 rounded-xl border-l-4 border-glow bg-glow/10 px-4 py-3 text-sm leading-relaxed">{o.summary}</p>
         </div>
       </div>
-      <div className="grid gap-3 border-t border-sand bg-white/60 p-4 sm:p-6 md:grid-cols-3">
+      <div className="grid gap-3 border-t border-sand bg-white/60 p-4 sm:p-6 sm:grid-cols-2 lg:grid-cols-3">
         {o.people.map((p) => <PersonColumn key={p.name} p={p} />)}
       </div>
     </article>
@@ -85,7 +86,7 @@ export default function ResultsPage() {
     return (
       <div className="mt-20 text-center">
         <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-sand border-t-clay" />
-        <p className="mt-4 text-muted">Checking every listing against all three of you…</p>
+        <p className="mt-4 text-muted">Checking every listing against everyone&apos;s answers…</p>
       </div>
     );
   }

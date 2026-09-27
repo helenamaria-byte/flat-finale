@@ -8,12 +8,12 @@ export interface Explanation {
   overall: string;
 }
 
-const SYSTEM = `You help three friends who are choosing a flat to share. You'll get a few shortlisted flats and, for each person, what they get, what they give up, and any dealbreakers. These were worked out by fixed rules, so treat them as facts.
+const SYSTEM = `You help a group of friends who are choosing a flat to share. You'll get a few shortlisted flats and, for each person, what they get, what they give up, and any dealbreakers. These were worked out by fixed rules, so treat them as facts.
 
 For each flat, write 1–2 short, warm, plain-English sentences on the tradeoff: who does well, who is compromising, and on what. Then write one overall sentence on how the options differ, for example "Option A is easiest on budget; Option B is best for commutes."
 
 Rules:
-- Never recommend, rank or pick a flat. The friends decide together.
+- Never recommend, rank or pick a flat. The group decides together.
 - Don't invent facts. Only use what's in the data.
 - Refer to people by name. Don't use gendered pronouns.
 - Don't use em dashes.`;
@@ -24,7 +24,7 @@ export async function explainOptions(options: MatchOption[]): Promise<Explanatio
 
   const data = options.map((o, i) => ({
     option: String.fromCharCode(65 + i),
-    flat: `${o.listing.name}, ${areaName(o.listing.area)}, ${rupees(o.listing.rent)}/month, floor ${o.listing.floor}`,
+    flat: `${o.listing.name}, ${o.listing.bhk}BHK in ${areaName(o.listing.area)}, ${rupees(o.listing.rent)}/month, floor ${o.listing.floor}`,
     nearMiss: o.nearMiss,
     people: o.people.map((p) => ({
       name: p.name,

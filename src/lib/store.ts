@@ -9,8 +9,8 @@ const redis = url && token ? new Redis({ url, token }) : null;
 export const storageKind: "redis" | "memory" = redis ? "redis" : "memory";
 
 // Local-dev fallback. It resets on restart and isn't shared between serverless instances.
-const g = globalThis as unknown as { __flatmatchMem?: Map<string, unknown> };
-const mem = (g.__flatmatchMem ??= new Map());
+const g = globalThis as unknown as { __flatFinaleMem?: Map<string, unknown> };
+const mem = (g.__flatFinaleMem ??= new Map());
 
 const TTL = 60 * 60 * 24 * 30; // 30 days
 
@@ -39,8 +39,8 @@ export async function saveResponse(id: string, i: number, r: MemberResponse) {
   await set(memberKey(id, i), r);
   await del(explainKey(id));
 }
-export const getResponses = (id: string) =>
-  Promise.all([0, 1, 2].map((i) => get<MemberResponse>(memberKey(id, i))));
+export const getResponses = (id: string, count: number) =>
+  Promise.all(Array.from({ length: count }, (_, i) => get<MemberResponse>(memberKey(id, i))));
 
 export const getExplanation = <T>(id: string) => get<T>(explainKey(id));
 export const saveExplanation = (id: string, v: unknown) => set(explainKey(id), v);

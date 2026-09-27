@@ -50,7 +50,8 @@ function Hub() {
   const { group, submitted } = status;
   const doneCount = submitted.filter(Boolean).length;
   const waiting = group.members.filter((_, i) => !submitted[i]);
-  const allDone = doneCount === 3;
+  const total = group.members.length;
+  const allDone = doneCount === total;
   const doneName = justDone !== null ? group.members[Number(justDone)] : null;
 
   async function copyLink() {
@@ -77,16 +78,16 @@ function Hub() {
       <div className="mt-2 grid items-center gap-8 md:grid-cols-[1.3fr_1fr]">
         <div>
           <h1 className="font-display text-4xl font-semibold sm:text-5xl">
-            {allDone ? "Everyone's in! 🎉" : `${doneCount}/3 filled`}
+            {allDone ? "Everyone's in! 🎉" : `${doneCount}/${total} filled`}
           </h1>
           <p className="mt-3 text-lg text-muted">
             {allDone
-              ? "All three forms are done. Your shortlist is ready."
-              : `Waiting for ${listNames(waiting)} to fill in ${waiting.length === 1 ? "their form" : "their forms"}. Results appear once all three are done.`}
+              ? `All ${total} forms are done. Your shortlist is ready.`
+              : `Waiting for ${listNames(waiting)} to fill in ${waiting.length === 1 ? "their form" : "their forms"}. Results appear once everyone is done.`}
           </p>
 
           <div className="mt-5 h-3 w-full max-w-md overflow-hidden rounded-full bg-sand">
-            <div className="h-full rounded-full bg-teal transition-all duration-700" style={{ width: `${(doneCount / 3) * 100}%` }} />
+            <div className="h-full rounded-full bg-teal transition-all duration-700" style={{ width: `${(doneCount / total) * 100}%` }} />
           </div>
 
           {allDone ? (

@@ -10,6 +10,11 @@ function parse(body: Record<string, unknown>): MemberResponse | string {
   if (!Number.isFinite(maxRent) || maxRent < 5000 || maxRent > 200000) return "Enter a monthly budget between ₹5,000 and ₹2,00,000.";
 
   const noGoAreas = (Array.isArray(body.noGoAreas) ? body.noGoAreas : []).filter(isArea);
+  const noGoCustom = (Array.isArray(body.noGoCustom) ? body.noGoCustom : [])
+    .filter((p): p is string => typeof p === "string")
+    .map((p) => p.trim().slice(0, 40))
+    .filter(Boolean)
+    .slice(0, 10);
 
   const rawAnchors = Array.isArray(body.anchors) ? body.anchors.slice(0, 4) : [];
   const anchors: Anchor[] = [];
@@ -27,7 +32,7 @@ function parse(body: Record<string, unknown>): MemberResponse | string {
     features[f.key] = v === "must" || v === "nice" ? v : "skip";
   }
 
-  return { maxRent, noGoAreas, anchors, features, submittedAt: new Date().toISOString() };
+  return { maxRent, noGoAreas, noGoCustom, anchors, features, submittedAt: new Date().toISOString() };
 }
 
 export async function POST(request: Request, { params }: RouteContext<"/api/groups/[id]/members/[index]">) {
@@ -35,7 +40,7 @@ export async function POST(request: Request, { params }: RouteContext<"/api/grou
   const i = Number(index);
   const group = await getGroup(id);
   if (!group) return Response.json({ error: "Group not found" }, { status: 404 });
-  if (![0, 1, 2].includes(i)) return Response.json({ error: "Unknown member" }, { status: 400 });
+  if (!Number.isInteger(i) || i < 0 || i >= group.members.length) return Response.json({ error: "Unknown member" }, { status: 400 });
 
   const body = await request.json().catch(() => ({}));
   const parsed = parse(body);

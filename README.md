@@ -1,13 +1,13 @@
-# FlatMatch
+# Flat-Finale
 
-Three friends want to share a flat. Instead of arguing about listings one objection at a time, each person fills in a private form first. FlatMatch then shows 2–3 flats with a clear breakdown of what each person gets and what they give up.
+A group of friends (2 to 10 people) want to share a flat. Instead of arguing about listings one objection at a time, each person fills in a private form first. Flat-Finale then shows 2–3 flats with a clear breakdown of what each person gets and what they give up.
 
 ## How it works
 
-1. **Setup:** name the group and the three flatmates.
-2. **Private forms:** each person enters their max rent, areas they won't live in, places they need to reach (with a time limit), and must-have or nice-to-have features.
+1. **Setup:** name the group, choose how many people (2–10) and enter their names.
+2. **Private forms:** each person enters their max rent, areas they won't live in (from the list or typed in), places they need to reach (with a time limit), and must-have or nice-to-have features such as their own bedroom.
 3. **Status page:** shows who's done, e.g. "1/3 filled, waiting for Meera and Kavita". Answers stay hidden.
-4. **Results:** once all three are done, flats that break any dealbreaker are ruled out and the rest are ranked by nice-to-haves. Each option shows ✓ gets / ⚠ compromises / ✗ dealbreakers per person, plus which dealbreakers ruled out the most flats.
+4. **Results:** once everyone is done, listings without enough bedrooms (at most 2 people per room) are skipped, flats that break any dealbreaker are ruled out and the rest are ranked by nice-to-haves. Each option shows ✓ gets / ⚠ compromises / ✗ dealbreakers per person, plus which dealbreakers ruled out the most flats.
 
 The app never picks the flat. The matching is fixed rules (`src/lib/match.ts`). Claude only writes the plain-language summaries (`src/lib/explain.ts`), and the app works without it.
 

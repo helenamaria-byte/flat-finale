@@ -33,6 +33,8 @@ export default function FillPage() {
   const [step, setStep] = useState(0);
   const [maxRent, setMaxRent] = useState(20000);
   const [noGo, setNoGo] = useState<AreaId[]>([]);
+  const [noGoCustom, setNoGoCustom] = useState<string[]>([]);
+  const [customDraft, setCustomDraft] = useState("");
   const [anchors, setAnchors] = useState<AnchorDraft[]>([{ preset: "Office", custom: "", area: "", maxMinutes: 30 }]);
   const [features, setFeatures] = useState<Record<FeatureKey, Pref>>(
     () => Object.fromEntries(FEATURES.map((f) => [f.key, "skip"])) as Record<FeatureKey, Pref>,
@@ -52,6 +54,7 @@ export default function FillPage() {
   const name = status.group.members[i];
   if (!name) return <p className="mt-16 text-center text-muted">We couldn&apos;t find that person in this group.</p>;
   const alreadyDone = status.submitted[i];
+  const groupSize = status.group.members.length;
 
   const anchorLabel = (a: AnchorDraft) => (a.preset === "Other" ? a.custom.trim() : a.preset);
   const updateAnchor = (k: number, patch: Partial<AnchorDraft>) =>
@@ -68,7 +71,18 @@ export default function FillPage() {
     return "";
   }
 
+  // A typed place that matches a listed area becomes that area's chip; anything else is kept as typed.
+  function addCustomPlace() {
+    const place = customDraft.trim().replace(/\s+/g, " ").slice(0, 40);
+    setCustomDraft("");
+    if (!place) return;
+    const known = AREA_IDS.find((ar) => areaName(ar).toLowerCase() === place.toLowerCase());
+    if (known) setNoGo((prev) => (prev.includes(known) ? prev : [...prev, known]));
+    else setNoGoCustom((prev) => (prev.some((p) => p.toLowerCase() === place.toLowerCase()) || prev.length >= 10 ? prev : [...prev, place]));
+  }
+
   function next() {
+    if (step === 1 && customDraft.trim()) addCustomPlace();
     const e = validate(step);
     setError(e);
     if (!e) setStep(step + 1);
@@ -84,6 +98,7 @@ export default function FillPage() {
         body: JSON.stringify({
           maxRent,
           noGoAreas: noGo,
+          noGoCustom,
           anchors: anchors.map((a) => ({ label: anchorLabel(a), area: a.area, maxMinutes: a.maxMinutes })),
           features,
         }),
@@ -198,7 +213,30 @@ export default function FillPage() {
                     </button>
                   );
                 })}
+                {noGoCustom.map((p) => (
+                  <span key={p} className="inline-flex items-center gap-1.5 rounded-full border border-bad bg-bad/10 py-1.5 pr-2 pl-3.5 text-sm text-bad">
+                    <span className="line-through">{p}</span>
+                    <button onClick={() => setNoGoCustom((prev) => prev.filter((x) => x !== p))} className="rounded-full px-1 font-semibold hover:bg-bad/15" aria-label={`Remove ${p}`}>×</button>
+                  </span>
+                ))}
               </div>
+              <form
+                className="mt-4 flex gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  addCustomPlace();
+                }}
+              >
+                <input
+                  className="input"
+                  placeholder="Not in the list? Type a place, e.g. Pashan"
+                  value={customDraft}
+                  maxLength={40}
+                  onChange={(e) => setCustomDraft(e.target.value)}
+                  aria-label="Add a place you won't live in"
+                />
+                <button className="btn btn-ghost shrink-0 px-5" disabled={!customDraft.trim()}>Add</button>
+              </form>
             </section>
           </div>
         )}
@@ -214,7 +252,9 @@ export default function FillPage() {
                 <div key={f.key} className="flex flex-col gap-2 py-3.5 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <div className="font-medium">{f.label}</div>
-                    <div className="text-xs text-muted">{f.hint}</div>
+                    <div className="text-xs text-muted">
+                      {f.key === "ownRoom" ? `The flat needs ${groupSize}+ bedrooms` : f.key === "ownBathroom" ? `The flat needs ${groupSize}+ bathrooms` : f.hint}
+                    </div>
                   </div>
                   <div className="flex gap-1.5" role="radiogroup" aria-label={f.label}>
                     {PREF_OPTIONS.map((o) => (
@@ -249,7 +289,7 @@ export default function FillPage() {
               </div>
               <div>
                 <dt className="font-semibold">Won&apos;t live in</dt>
-                <dd className="text-muted">{noGo.length ? noGo.map(areaName).join(", ") : "Open to all areas"}</dd>
+                <dd className="text-muted">{noGo.length || noGoCustom.length ? [...noGo.map(areaName), ...noGoCustom].join(", ") : "Open to all areas"}</dd>
               </div>
               <div>
                 <dt className="font-semibold text-clay">Must haves</dt>

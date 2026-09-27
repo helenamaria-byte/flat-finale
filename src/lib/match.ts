@@ -8,7 +8,7 @@ export const rupees = (n: number) => "₹" + Math.round(n).toLocaleString("en-IN
 /**
  * Splits rent so nobody pays more than their max. Tries an even split first; if someone
  * can't afford an even share, they pay their max and the others share the remainder.
- * Returns null when the rent is higher than all three budgets combined.
+ * Returns null when the rent is higher than everyone's budgets combined.
  */
 export function splitRent(rent: number, maxes: number[]): number[] | null {
   if (maxes.reduce((a, b) => a + b, 0) < rent) return null;
@@ -31,6 +31,15 @@ export function splitRent(rent: number, maxes: number[]): number[] | null {
   return shares.map((s) => Math.round(s / 100) * 100);
 }
 
+const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+function matchesPlace(listing: Listing, place: string) {
+  const p = norm(place);
+  if (p.length < 3) return false;
+  const area = norm(areaName(listing.area));
+  return area.includes(p) || p.includes(area) || norm(listing.name).includes(p);
+}
+
 interface Evaluated {
   listing: Listing;
   people: PersonVerdict[];
@@ -44,7 +53,8 @@ interface Evaluated {
 function evaluate(listing: Listing, names: string[], responses: MemberResponse[]): Evaluated {
   const maxes = responses.map((r) => r.maxRent);
   const shares = splitRent(listing.rent, maxes);
-  const even = listing.rent / 3;
+  const n = names.length;
+  const even = listing.rent / n;
   const unevenSplit = !!shares && shares.some((s) => Math.abs(s - even) > 100);
   const blockerKeys: Evaluated["blockerKeys"] = [];
   let niceMet = 0;
@@ -71,6 +81,12 @@ function evaluate(listing: Listing, names: string[], responses: MemberResponse[]
     if (r.noGoAreas.includes(listing.area)) {
       block(`nogo:${listing.area}`, `Won't live in ${areaName(listing.area)}`, `It's in ${areaName(listing.area)}, one of their no-go areas`);
     }
+    // Places typed in by hand: rule out listings whose area or name matches.
+    for (const place of r.noGoCustom ?? []) {
+      if (matchesPlace(listing, place)) {
+        block(`nogo-custom:${place.toLowerCase()}`, `Won't live in ${place}`, `It's in or near ${place}, one of their no-go places`);
+      }
+    }
 
     // Commute limits
     for (const a of r.anchors) {
@@ -87,15 +103,15 @@ function evaluate(listing: Listing, names: string[], responses: MemberResponse[]
     for (const f of FEATURES) {
       const pref = r.features[f.key];
       if (pref === "skip") continue;
-      const has = hasFeature(listing, f.key);
+      const has = hasFeature(listing, f.key, n);
       if (pref === "must") {
         if (has) v.gets.push(featureLabel(f.key));
-        else block(`feature:${f.key}`, `Needs: ${featureLabel(f.key).toLowerCase()}`, missingText(listing, f.key));
+        else block(`feature:${f.key}`, `Needs: ${featureLabel(f.key).toLowerCase()}`, missingText(listing, f.key, n));
       } else if (has) {
         v.gets.push(featureLabel(f.key));
         niceMet++;
       } else {
-        v.compromises.push(missingText(listing, f.key));
+        v.compromises.push(missingText(listing, f.key, n));
       }
     }
     return v;
@@ -123,9 +139,12 @@ export function fallbackSummary(o: Pick<MatchOption, "people" | "nearMiss">): st
   return parts.join("; ") + ".";
 }
 
+/** Minimum bedrooms so that nobody has to share a room with more than one other person. */
+export const minBedrooms = (people: number) => Math.ceil(people / 2);
+
 export function computeMatches(group: Group, responses: MemberResponse[]) {
   const names = group.members;
-  const all = LISTINGS.map((l) => evaluate(l, names, responses));
+  const all = LISTINGS.filter((l) => l.bhk >= minBedrooms(names.length)).map((l) => evaluate(l, names, responses));
 
   const rankFit = (a: Evaluated, b: Evaluated) =>
     b.niceMet - a.niceMet || a.compromiseCount - b.compromiseCount || a.listing.rent - b.listing.rent;

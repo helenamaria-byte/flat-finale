@@ -5,7 +5,7 @@ export type AreaId =
   | "hadapsar" | "magarpatta";
 
 export type FeatureKey =
-  | "lift" | "parking" | "ownBathroom" | "petFriendly" | "furnished"
+  | "ownRoom" | "lift" | "parking" | "ownBathroom" | "petFriendly" | "furnished"
   | "balcony" | "gated" | "societyGym" | "nearMetro" | "powerBackup";
 
 /** must = dealbreaker if missing, nice = preferred, skip = don't care */
@@ -20,6 +20,8 @@ export interface Anchor {
 export interface MemberResponse {
   maxRent: number;
   noGoAreas: AreaId[];
+  /** Places typed in by hand that aren't in the area list */
+  noGoCustom: string[];
   anchors: Anchor[];
   features: Record<FeatureKey, Pref>;
   submittedAt: string;
@@ -28,7 +30,7 @@ export interface MemberResponse {
 export interface Group {
   id: string;
   name: string;
-  members: [string, string, string];
+  members: string[];
   createdAt: string;
 }
 
@@ -42,6 +44,7 @@ export interface Listing {
   id: string;
   name: string;
   area: AreaId;
+  bhk: number;
   rent: number;
   sqft: number;
   floor: number;

@@ -10,16 +10,17 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/grou
   const group = await getGroup(id);
   if (!group) return Response.json({ error: "Group not found" }, { status: 404 });
 
-  const responses = await getResponses(id);
+  const responses = await getResponses(id, group.members.length);
   if (responses.some((r) => !r)) {
     return Response.json({ error: "Not everyone has filled in their form yet." }, { status: 409 });
   }
 
+  const n = group.members.length;
   const { options, totalListings, qualifyingCount, blockers } = computeMatches(group, responses as MemberResponse[]);
   let overall =
     qualifyingCount > 0
-      ? `${qualifyingCount} of ${totalListings} listings meet all three people's dealbreakers.`
-      : `None of the ${totalListings} listings meet every dealbreaker. These are the closest ones.`;
+      ? `${qualifyingCount} of ${totalListings} listings with enough bedrooms for ${n} people meet everyone's dealbreakers.`
+      : `None of the ${totalListings} listings with enough bedrooms for ${n} people meet every dealbreaker.`;
 
   // Claude only writes the plain-language summaries. The matching above is rule-based.
   // The result is cached per shortlist so reloading the page doesn't call the API again.

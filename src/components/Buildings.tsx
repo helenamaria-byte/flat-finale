@@ -35,30 +35,41 @@ export function FlatBuilding({ listing, className = "" }: { listing: Listing; cl
   );
 }
 
-/** Three-storey building where each person has a window that lights up once they've submitted. */
+/** A building with one window per person that lights up once they've submitted. */
 export function HubBuilding({ names, submitted }: { names: string[]; submitted: boolean[] }) {
+  const cols = names.length > 4 ? 2 : 1;
+  const rows = Math.ceil(names.length / cols);
+  const cellW = 116, cellH = 46;
+  const bodyW = cols * cellW + 16;
+  const bx = 36, top = 70;
+  const bodyH = rows * cellH + 44;
+  const W = bodyW + bx * 2, H = top + bodyH + 14;
+  const ground = top + bodyH;
+  const cx = bx + bodyW / 2;
+  const maxLen = cols === 2 ? 8 : 10;
   return (
-    <svg viewBox="0 0 220 250" className="mx-auto w-full max-w-[240px]" role="img" aria-label={`${submitted.filter(Boolean).length} of 3 submitted`}>
-      <ellipse cx="110" cy="240" rx="100" ry="8" fill="#eadfcd" />
-      <path d="M30 70 L110 18 L190 70 Z" fill="#c65f3a" />
-      <rect x="40" y="68" width="140" height="170" rx="4" fill="#1f5c58" />
+    <svg viewBox={`0 0 ${W} ${H}`} className="mx-auto w-full" style={{ maxWidth: cols === 2 ? 340 : 240 }} role="img" aria-label={`${submitted.filter(Boolean).length} of ${names.length} submitted`}>
+      <ellipse cx={W / 2} cy={ground + 4} rx={W / 2 - 8} ry="8" fill="#eadfcd" />
+      <path d={`M${bx - 10} ${top + 2} L${cx} ${top - 50} L${bx + bodyW + 10} ${top + 2} Z`} fill="#c65f3a" />
+      <rect x={bx} y={top} width={bodyW} height={bodyH} rx="4" fill="#1f5c58" />
       {names.map((n, i) => {
-        const y = 82 + i * 50;
+        const x = bx + 8 + (i % cols) * cellW;
+        const y = top + 12 + Math.floor(i / cols) * cellH;
         const lit = submitted[i];
         return (
           <g key={i}>
-            <rect x="56" y={y} width="44" height="34" rx="4" fill={lit ? "#f6c56b" : "#174744"} className={lit ? "" : "flicker"} />
-            <line x1="78" y1={y} x2="78" y2={y + 34} stroke={lit ? "#e0a94a" : "#2f7470"} strokeWidth="2" />
-            <text x="112" y={y + 15} fill="#fbf6ee" fontSize="12" fontWeight="600">{n.length > 9 ? n.slice(0, 8) + "…" : n}</text>
-            <text x="112" y={y + 29} fill={lit ? "#f6c56b" : "#9fbcb9"} fontSize="10">{lit ? "done ✓" : "waiting…"}</text>
+            <rect x={x + 6} y={y} width="36" height="32" rx="4" fill={lit ? "#f6c56b" : "#174744"} className={lit ? "" : "flicker"} />
+            <line x1={x + 24} y1={y} x2={x + 24} y2={y + 32} stroke={lit ? "#e0a94a" : "#2f7470"} strokeWidth="2" />
+            <text x={x + 50} y={y + 14} fill="#fbf6ee" fontSize="12" fontWeight="600">{n.length > maxLen ? n.slice(0, maxLen - 1) + "…" : n}</text>
+            <text x={x + 50} y={y + 28} fill={lit ? "#f6c56b" : "#9fbcb9"} fontSize="10">{lit ? "done ✓" : "waiting…"}</text>
           </g>
         );
       })}
-      <rect x="98" y="218" width="24" height="20" rx="2" fill="#f6c56b" opacity="0.85" />
-      <circle cx="20" cy="222" r="14" fill="#8aa889" />
-      <rect x="19" y="228" width="3" height="12" fill="#6f8b6e" />
-      <circle cx="202" cy="226" r="11" fill="#8aa889" />
-      <rect x="201" y="231" width="3" height="9" fill="#6f8b6e" />
+      <rect x={cx - 12} y={ground - 22} width="24" height="22" rx="2" fill="#f6c56b" opacity="0.85" />
+      <circle cx={bx - 16} cy={ground - 18} r="14" fill="#8aa889" />
+      <rect x={bx - 17} y={ground - 12} width="3" height="12" fill="#6f8b6e" />
+      <circle cx={bx + bodyW + 16} cy={ground - 14} r="11" fill="#8aa889" />
+      <rect x={bx + bodyW + 15} y={ground - 9} width="3" height="9" fill="#6f8b6e" />
     </svg>
   );
 }

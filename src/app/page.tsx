@@ -2,11 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { MAX_PEOPLE, MIN_PEOPLE } from "@/lib/limits";
+
+const EXAMPLES = ["Riya", "Meera", "Kavita", "Ananya", "Sara", "Ishaan", "Kabir", "Zoya", "Arjun", "Tara"];
 
 const STEPS = [
   {
     title: "Name your group",
-    body: "Add a group name and the three people moving in.",
+    body: "Add a group name, how many of you there are, and everyone's name.",
     icon: (
       <path d="M8 20v-1a4 4 0 0 1 4-4h0a4 4 0 0 1 4 4v1M12 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM4 20v-.5A3 3 0 0 1 6.5 16.6M20 20v-.5a3 3 0 0 0-2.5-2.9M6 11a2 2 0 1 0 0-4M18 11a2 2 0 1 0 0-4" />
     ),
@@ -30,6 +33,13 @@ export default function Home() {
   const [members, setMembers] = useState(["", "", ""]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+
+  // Keeps names already typed when the group size changes.
+  function resize(count: number) {
+    if (!Number.isFinite(count)) return;
+    const n = Math.min(MAX_PEOPLE, Math.max(MIN_PEOPLE, Math.round(count)));
+    setMembers((prev) => Array.from({ length: n }, (_, i) => prev[i] ?? ""));
+  }
 
   async function create(e: React.FormEvent) {
     e.preventDefault();
@@ -55,7 +65,7 @@ export default function Home() {
       <div className="rise pt-6 sm:pt-12">
         <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-clay">Hello 👋</p>
         <h1 className="max-w-3xl font-display text-4xl leading-tight font-semibold sm:text-6xl">
-          Find a flat all three of you can live with.
+          Find a flat your whole group can live with.
         </h1>
         <p className="mt-5 max-w-2xl text-lg text-muted">
           Checking listings one objection at a time in a group chat doesn&apos;t work. By the time everyone has weighed in, someone&apos;s upset and the flat is gone. We&apos;ll do it the other way round: everyone says what they need <em>first</em>, then we look at flats.
@@ -80,7 +90,7 @@ export default function Home() {
           <button className="btn btn-primary px-8 py-4 text-lg" onClick={() => setStage("setup")}>
             Let&apos;s begin →
           </button>
-          <p className="text-sm text-muted">Takes about 3 minutes each. The app doesn&apos;t pick a flat. You three decide.</p>
+          <p className="text-sm text-muted">Takes about 3 minutes each. The app doesn&apos;t pick a flat. You decide together.</p>
         </div>
       </div>
     );
@@ -90,7 +100,7 @@ export default function Home() {
     <div className="rise mx-auto max-w-xl pt-6 sm:pt-10">
       <button className="mb-6 text-sm text-muted hover:text-ink" onClick={() => setStage("intro")}>← Back</button>
       <h1 className="font-display text-3xl font-semibold sm:text-4xl">Who&apos;s moving in?</h1>
-      <p className="mt-2 text-muted">You&apos;ll get a link to share with the other two.</p>
+      <p className="mt-2 text-muted">Any group size from {MIN_PEOPLE} to {MAX_PEOPLE}. You&apos;ll get a link to share with everyone.</p>
 
       <form onSubmit={create} className="card mt-8 space-y-6 p-6 sm:p-8">
         <label className="block">
@@ -98,17 +108,33 @@ export default function Home() {
           <input className="input" placeholder="e.g. The Baner Dreamers" value={groupName} onChange={(e) => setGroupName(e.target.value)} maxLength={60} required />
         </label>
         <fieldset className="space-y-3">
-          <legend className="mb-1.5 text-sm font-semibold">The three flatmates</legend>
+          <div className="mb-3 flex items-center justify-between gap-4">
+            <legend className="text-sm font-semibold">How many of you?</legend>
+            <div className="flex items-center gap-2" role="group" aria-label="Number of flatmates">
+              <button type="button" className="btn btn-ghost h-9 w-9 p-0 text-lg" onClick={() => resize(members.length - 1)} disabled={members.length <= MIN_PEOPLE} aria-label="One fewer person">−</button>
+              <select
+                className="input w-20 px-2 py-1.5 text-center font-semibold"
+                value={members.length}
+                onChange={(e) => resize(Number(e.target.value))}
+                aria-label="Number of people"
+              >
+                {Array.from({ length: MAX_PEOPLE - MIN_PEOPLE + 1 }, (_, k) => MIN_PEOPLE + k).map((n) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+              <button type="button" className="btn btn-ghost h-9 w-9 p-0 text-lg" onClick={() => resize(members.length + 1)} disabled={members.length >= MAX_PEOPLE} aria-label="One more person">+</button>
+            </div>
+          </div>
           {members.map((m, i) => (
             <div key={i} className="flex items-center gap-3">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-glow/40 text-sm font-semibold text-clay-dark">{i + 1}</span>
               <input
                 className="input"
-                placeholder={["e.g. Riya", "e.g. Meera", "e.g. Kavita"][i]}
+                placeholder={`e.g. ${EXAMPLES[i] ?? `Person ${i + 1}`}`}
                 value={m}
                 maxLength={30}
                 required
-                onChange={(e) => setMembers(members.map((x, j) => (j === i ? e.target.value : x)))}
+                onChange={(e) => setMembers((prev) => prev.map((x, j) => (j === i ? e.target.value : x)))}
               />
             </div>
           ))}

@@ -8,7 +8,7 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const fraunces = Fraunces({ variable: "--font-fraunces", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "FlatMatch: find a flat all three of you can live with",
+  title: "Flat-Finale: find a flat your whole group can live with",
   description: "Each flatmate fills in a private form. You get 2–3 flats with a clear view of who gets what and who gives up what.",
 };
 
@@ -26,9 +26,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <rect x="16" y="13" width="4" height="4" rx="1" fill="#f6c56b" />
               <rect x="12" y="20" width="4" height="6" rx="1" fill="#f6c56b" />
             </svg>
-            FlatMatch
+            Flat-Finale
           </Link>
-          <span className="hidden text-sm text-muted sm:block">Three people, one flat, no surprises</span>
+          <span className="hidden text-sm text-muted sm:block">Your group, one flat, no surprises</span>
         </header>
         <main className="relative z-10 mx-auto w-full max-w-5xl flex-1 px-4 pb-48 sm:px-6">{children}</main>
       </body>

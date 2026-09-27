@@ -1,9 +1,10 @@
 import type { FeatureKey, Listing } from "./types";
 
 export const FEATURES: { key: FeatureKey; label: string; hint: string; missing: string }[] = [
+  { key: "ownRoom", label: "My own bedroom", hint: "One bedroom per person, no sharing", missing: "Some people share a bedroom" },
   { key: "lift", label: "Lift", hint: "Ground or 1st floor also counts", missing: "No lift" },
   { key: "parking", label: "Parking", hint: "A covered spot for a car or bike", missing: "No parking" },
-  { key: "ownBathroom", label: "My own bathroom", hint: "The flat has 3 bathrooms", missing: "Shared bathroom" },
+  { key: "ownBathroom", label: "My own bathroom", hint: "One bathroom per person", missing: "Shared bathroom" },
   { key: "petFriendly", label: "Pet-friendly", hint: "The owner allows pets", missing: "No pets allowed" },
   { key: "furnished", label: "Furnished", hint: "Beds, sofa, fridge, etc.", missing: "Unfurnished" },
   { key: "balcony", label: "Balcony", hint: "Somewhere to sit outside", missing: "No balcony" },
@@ -15,20 +16,23 @@ export const FEATURES: { key: FeatureKey; label: string; hint: string; missing: 
 
 export const featureLabel = (k: FeatureKey) => FEATURES.find((f) => f.key === k)!.label;
 
-export function hasFeature(l: Listing, k: FeatureKey): boolean {
+export function hasFeature(l: Listing, k: FeatureKey, groupSize: number): boolean {
   switch (k) {
+    case "ownRoom":
+      return l.bhk >= groupSize;
     case "lift":
       return l.lift || l.floor <= 1;
     case "ownBathroom":
-      return l.bathrooms >= 3;
+      return l.bathrooms >= groupSize;
     default:
       return l[k];
   }
 }
 
-export function missingText(l: Listing, k: FeatureKey): string {
+export function missingText(l: Listing, k: FeatureKey, groupSize: number): string {
   const f = FEATURES.find((x) => x.key === k)!;
   if (k === "lift") return `No lift, and it's on floor ${l.floor}`;
-  if (k === "ownBathroom") return `Only ${l.bathrooms} bathrooms for 3 people`;
+  if (k === "ownRoom") return `Only ${l.bhk} bedrooms for ${groupSize} people, so some share`;
+  if (k === "ownBathroom") return `Only ${l.bathrooms} bathrooms for ${groupSize} people`;
   return f.missing;
 }
