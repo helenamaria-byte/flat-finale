@@ -8,9 +8,10 @@ const sbUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
 const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = sbUrl && sbKey ? createClient(sbUrl, sbKey, { auth: { persistSession: false } }) : null;
 
-// Upstash Redis: Vercel's integration sets KV_REST_API_*; a direct Upstash setup uses UPSTASH_REDIS_REST_*.
-const url = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
-const token = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
+// Upstash Redis: Vercel's integration sets <PREFIX>_KV_REST_API_* (FLATDB is the prefix this project's
+// database was connected with) or KV_REST_API_* with no prefix; a direct Upstash setup uses UPSTASH_REDIS_REST_*.
+const url = process.env.FLATDB_KV_REST_API_URL ?? process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
+const token = process.env.FLATDB_KV_REST_API_TOKEN ?? process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
 const redis = !supabase && url && token ? new Redis({ url, token }) : null;
 
 export const storageKind: "supabase" | "redis" | "memory" = supabase ? "supabase" : redis ? "redis" : "memory";
