@@ -142,7 +142,7 @@ export default function ResultsPage() {
 
       <p className="mt-8 text-xs text-muted">
         Listings are sample data for this demo, and commute times are rough peak-hour estimates.
-        {data.aiUsed ? " Summaries are written by Claude from the rule-based results." : " Summaries are generated from the rule-based results."}
+        {data.aiUsed ? " Summaries are written by Gemini from the rule-based results." : " Summaries are generated from the rule-based results."}
       </p>
     </div>
   );

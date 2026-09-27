@@ -22,7 +22,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/grou
       ? `${qualifyingCount} of ${totalListings} listings with enough bedrooms for ${n} people meet everyone's dealbreakers.`
       : `None of the ${totalListings} listings with enough bedrooms for ${n} people meet every dealbreaker.`;
 
-  // Claude only writes the plain-language summaries. The matching above is rule-based.
+  // Gemini only writes the plain-language summaries. The matching above is rule-based.
   // The result is cached per shortlist so reloading the page doesn't call the API again.
   const ids = options.map((o) => o.listing.id).join(",");
   let explanation = await getExplanation<Explanation & { ids: string }>(id);

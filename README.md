@@ -9,7 +9,7 @@ A group of friends (2 to 10 people) want to share a flat. Instead of arguing abo
 3. **Status page:** shows who's done, e.g. "1/3 filled, waiting for Meera and Kavita". Answers stay hidden.
 4. **Results:** once everyone is done, listings without enough bedrooms (at most 2 people per room) are skipped, flats that break any dealbreaker are ruled out and the rest are ranked by nice-to-haves. Each option shows ✓ gets / ⚠ compromises / ✗ dealbreakers per person, plus which dealbreakers ruled out the most flats.
 
-The app never picks the flat. The matching is fixed rules (`src/lib/match.ts`). Claude only writes the plain-language summaries (`src/lib/explain.ts`), and the app works without it.
+The app never picks the flat. The matching is fixed rules (`src/lib/match.ts`). Gemini only writes the plain-language summaries (`src/lib/explain.ts`), and the app works without it.
 
 ## Run locally
 
@@ -26,7 +26,7 @@ Without Redis it uses in-memory storage, which is fine for local testing.
 2. Create a free project at [supabase.com](https://supabase.com). Open **SQL Editor**, paste the contents of `supabase/schema.sql` and click **Run**.
 3. In Supabase, open **Project Settings → API** and copy the **Project URL** and the **service_role** key.
 4. In Vercel, open **Settings → Environment Variables** and add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
-5. Optional: add `ANTHROPIC_API_KEY` to get Claude-written summaries.
+5. Optional: add `GEMINI_API_KEY` to get Gemini-written summaries (default model `gemini-2.5-flash`; set `GEMINI_MODEL` to change it).
 6. Redeploy.
 
 Upstash Redis also works instead of Supabase (Vercel → Storage → Upstash for Redis).
